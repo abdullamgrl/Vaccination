@@ -17,6 +17,10 @@ Admin:
     -No.Of registration
     -Slots
     -No.of Vaccines Available 
+
+
+
+    
 User:
   -Signin page
     *aadhaar number
