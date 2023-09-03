@@ -28,8 +28,8 @@ User:
   -number of slots
   -number of vaccines already taken
 
-
-
+MindMap
+https://miro.com/app/board/uXjVMs2gtZs=/?share_link_id=800377231225
 
 
 
