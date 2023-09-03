@@ -1,0 +1,229 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <ctype.h>
+
+#define MAX_USERS 100 // Maximum number of users
+#define MAX_NAME_LENGTH 50
+#define MAX_AADHAR_LENGTH 15
+
+struct User {
+    char name[MAX_NAME_LENGTH];
+    char aadhar[MAX_AADHAR_LENGTH];
+    int vaccinated;
+};
+
+void clearInputBuffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
+bool isAadharValid(const char *aadhar) {
+    int length = strlen(aadhar);
+    if (length != 12) { // Aadhar numbers in India are typically 12 digits
+        return false;
+    }
+    for (int i = 0; i < length; i++) {
+        if (!isdigit(aadhar[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void registerUser() {
+    struct User newUser;
+    printf("Enter your name (up to %d characters): ", MAX_NAME_LENGTH - 1);
+    scanf("%49s", newUser.name);
+    clearInputBuffer();
+
+    printf("Enter your Aadhar number (12 digits): ");
+    scanf("%14s", newUser.aadhar);
+    clearInputBuffer();
+
+    if (!isAadharValid(newUser.aadhar)) {
+        printf("Invalid Aadhar number. Registration failed.\n");
+        return;
+    }
+
+    newUser.vaccinated = 0;  // Set vaccinated status to 0 (not vaccinated)
+
+    FILE *file = fopen("users.txt", "a");
+    if (file != NULL) {
+        fprintf(file, "%s %s %d\n", newUser.name, newUser.aadhar, newUser.vaccinated);
+        fclose(file);
+        printf("User registered successfully!\n");
+    } else {
+        printf("Error: Unable to register user.\n");
+    }
+}
+
+
+int loginUser(const char *aadhar) {
+    FILE *file = fopen("users.txt", "r");
+    if (file != NULL) {
+        struct User currentUser;
+        int userIndex = 0;
+
+        while (fscanf(file, "%49s %14s %d", currentUser.name, currentUser.aadhar, &currentUser.vaccinated) != EOF) {
+            if (strcmp(currentUser.aadhar, aadhar) == 0) {
+                fclose(file);
+                return userIndex;  // Return user index if Aadhar is found
+            }
+            userIndex++;
+        }
+        fclose(file);
+    }
+
+    return -1;  // Return -1 if Aadhar is not found
+}
+
+void registerVaccine(int userIndex) {
+    FILE *file = fopen("users.txt", "a+");
+    if (file != NULL) {
+        struct User currentUser;
+        int currentIndex = 0;
+       
+        while (fscanf(file, "%49s %14s %d", currentUser.name, currentUser.aadhar, &currentUser.vaccinated) != EOF) {
+            if (currentIndex == userIndex) {
+                currentUser.vaccinated = 1;
+                fseek(file, -strlen(currentUser.aadhar) - 2, SEEK_CUR);  // Move back to update line
+                fprintf(file, "%s %s %d\n", currentUser.name, currentUser.aadhar, currentUser.vaccinated);
+                printf("Vaccine registration successful!\n");
+                break;
+            }
+            currentIndex++;
+        }
+
+        fclose(file);
+    }
+}
+
+void displayUsers() {
+    FILE *file = fopen("users.txt", "r");
+    int cnt=0;
+    if (file != NULL) {
+        struct User currentUser;
+       
+        printf("\nUsers:\n");
+        printf("-----------------------------------------------------\n");
+        printf("|S/N | %-20s | %-15s | Vaccinated |\n", "Name", "Aadhar");
+        printf("-----------------------------------------------------\n");
+
+        while (fscanf(file, "%49s %14s %d", currentUser.name, currentUser.aadhar, &currentUser.vaccinated) != EOF) {
+            //printf("| %-20s | %-15s | %-10s |\n", currentUser.name, currentUser.aadhar, currentUser.vaccinated ? "Yes" : "No");
+            if(file,currentUser.vaccinated == 1){
+              cnt++;  
+              printf("|%d:  | %-20s | %-15s | %-10s |\n",cnt, currentUser.name, currentUser.aadhar, currentUser.vaccinated ? "Yes" : "No");
+            }
+        }
+
+        printf("-----------------------------------------------------\n");
+        fclose(file);
+       
+    } else {
+        printf("Error: Unable to display users.\n");
+    }
+}
+
+void adminLogin() {
+    char adminPassword[15];
+    printf("Enter admin password: ");
+    scanf("%14s", adminPassword);
+    clearInputBuffer();
+
+    // Change the password to match your admin password
+    if (strcmp(adminPassword, "admin123") == 0) {
+        int choice;
+        while (1) {
+            printf("\nAdmin Page:\n");
+            printf("1. Display Users\n2. Exit Admin Page\n");
+            printf("Enter your choice: ");
+            scanf("%d", &choice);
+            clearInputBuffer();
+
+            switch (choice) {
+                case 1:
+                    displayUsers(); // Display users from here
+                    break;
+
+                case 2:
+                    printf("Exiting Admin Page...\n");
+                    return;
+
+                default:
+                    printf("Invalid choice!\n");
+                    break;
+            }
+        }
+    } else {
+        printf("Admin login failed.\n");
+    }
+}
+
+int main() {
+    int choice;
+    char aadhar[15];
+    int userIndex = -1;  // Default value indicating no user is logged in
+
+    while (1) {
+        printf("\nVaccine Registration System:\n");
+        printf("1. Register User\n2. Login\n3. Admin Login\n4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        clearInputBuffer();
+
+        switch (choice) {
+            case 1:
+                registerUser();
+                break;
+
+            case 2: {
+                printf("Enter your Aadhar number (12 digits): ");
+                scanf("%14s", aadhar);
+                clearInputBuffer();
+
+                userIndex = loginUser(aadhar);
+                if (userIndex != -1) {
+                    printf("Login successful!\n");
+                    printf("1. Register Vaccine\n2. Logout\nEnter your choice: ");
+                    int userChoice;
+                    scanf("%d", &userChoice);
+                    clearInputBuffer();
+                    switch (userChoice) {
+                        case 1:
+                            registerVaccine(userIndex);
+                            break;
+
+                        case 2:
+                            userIndex = -1;
+                            printf("Logged out.\n");
+                            break;
+
+                        default:
+                            printf("Invalid choice!\n");
+                            break;
+                    }
+                } else {
+                    printf("Login failed. User not found.\n");
+                }
+                break;
+            }
+
+            case 3:
+                adminLogin();
+                break;
+
+            case 4:
+                printf("Exiting...\n");
+                return 0;
+
+            default:
+                printf("Invalid choice!\n");
+                break;
+        }
+    }
+
+    return 0;
+}
