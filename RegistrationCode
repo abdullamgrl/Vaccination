@@ -88,7 +88,7 @@ void registerVaccine(int userIndex) {
         while (fscanf(file, "%49s %14s %d", currentUser.name, currentUser.aadhar, &currentUser.vaccinated) != EOF) {
             if (currentIndex == userIndex) {
                 currentUser.vaccinated = 1;
-                fseek(file, -strlen(currentUser.aadhar) - 2, SEEK_CUR);  // Move back to update line
+                //fseek(file, -strlen(currentUser.aadhar) - 2, SEEK_CUR);  // Move back to update line
                 fprintf(file, "%s %s %d\n", currentUser.name, currentUser.aadhar, currentUser.vaccinated);
                 printf("Vaccine registration successful!\n");
                 break;
@@ -107,21 +107,21 @@ void displayUsers() {
         struct User currentUser;
        
         printf("\nUsers:\n");
-        printf("-----------------------------------------------------\n");
-        printf("|S/N | %-20s | %-15s | Vaccinated |\n", "Name", "Aadhar");
-        printf("-----------------------------------------------------\n");
+        printf("------------------------------------------------------------\n");
+        printf("| S/N | %-20s | %-15s | Vaccinated |\n", "Name", "Aadhar");
+        printf("------------------------------------------------------------\n");
 
         while (fscanf(file, "%49s %14s %d", currentUser.name, currentUser.aadhar, &currentUser.vaccinated) != EOF) {
             //printf("| %-20s | %-15s | %-10s |\n", currentUser.name, currentUser.aadhar, currentUser.vaccinated ? "Yes" : "No");
             if(file,currentUser.vaccinated == 1){
               cnt++;  
-              printf("|%d:  | %-20s | %-15s | %-10s |\n",cnt, currentUser.name, currentUser.aadhar, currentUser.vaccinated ? "Yes" : "No");
+              printf("| %d : | %-20s | %-15s | %-10s |\n",cnt, currentUser.name, currentUser.aadhar, currentUser.vaccinated ? "Yes" : "No");
             }
         }
 
-        printf("-----------------------------------------------------\n");
+        printf("------------------------------------------------------------\n");
         fclose(file);
-       
+        
     } else {
         printf("Error: Unable to display users.\n");
     }
@@ -169,7 +169,7 @@ int main() {
 
     while (1) {
         printf("\nVaccine Registration System:\n");
-        printf("1. Register User\n2. Login\n3. Admin Login\n4. Exit\n");
+        printf("1. Register User\n2. User Login\n3. Admin Login\n4. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
         clearInputBuffer();
